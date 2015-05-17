@@ -1,6 +1,5 @@
 package jp.masazdream.ml;
 
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,10 +13,7 @@ import jp.masazdream.ml.inf.MachineLearning;
  * @author masai
  *
  */
-public class NueralNetwork implements MachineLearning{
-	// 事例リスト
-	List<Map.Entry<Integer, double[]>> mExamples = new ArrayList<Map.Entry<Integer, double[]>>();
-	
+public class NeuralNetwork implements MachineLearning{	
 	// 入力から中間層の重み係数(入力層のユニットi個、中間層のユニットj個のとき、j x i)
 	double[][] mW;
 	
@@ -48,7 +44,7 @@ public class NueralNetwork implements MachineLearning{
     	new Graph("NeuralNetwork Backpropagation"){
     		@Override
             public MachineLearning createLearningMachine() {
-                return new NueralNetwork(2, 2, 1, 5000, 0.2d);
+                return new NeuralNetwork(2, 2, 1, 10000, 0.2d);
             }
     	};    	
     }
@@ -59,7 +55,7 @@ public class NueralNetwork implements MachineLearning{
      * @param dim 入力パラメータ数
      * @param hiddendim 中間層のノード数
      */
-    public NueralNetwork(int dim, int hiddendim, int outputdim, int repeat, double eta){
+    public NeuralNetwork(int dim, int hiddendim, int outputdim, int repeat, double eta){
     	mDim = dim;
     	mHiddendim = hiddendim + 1; // 1はbias項
     	mOutputdim = outputdim;
@@ -107,11 +103,7 @@ public class NueralNetwork implements MachineLearning{
             // bias項を追加した入力データに追加
             xx[l] = example;
     	}
-    	
-    	
-    	// categoryとデータを事例リストに追加
-    	// TODO Map非使用
-    	
+    	    	
         // 事例データごとの中間層のデータ
     	double[][] zz = new double[examplesCnt][mDim]; 
     	
