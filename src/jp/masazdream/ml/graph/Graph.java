@@ -68,14 +68,16 @@ public class Graph {
         }
         
         //学習
-        int[] clz = new int[linear1X.length + linear2X.length];
+        int[][] clz = new int[linear1X.length + linear2X.length][2];
         double[][] examples = new double[linear1X.length + linear2X.length][2];
         for(int i = 0; i < linear1X.length; ++i){
-        	clz[i] = 0;
+        	clz[i][0] = 1; // 出力層の第1ユニットが1
+        	clz[i][1] = 0;
             examples[i] = new double[]{linear1X[i], linear1Y[i]};
         }
         for(int i = 0; i < linear2X.length; ++i){
-           clz[i + linear1X.length] = 1;
+           clz[i + linear1X.length][0] = 0;
+           clz[i + linear1X.length][1] = 1; // 出力層の第2ユニットが1
            examples[i + linear1X.length] = new double[]{linear2X[i], linear2Y[i]};
         }        
         ml.train(linear1X.length + linear2X.length, clz, examples);
@@ -88,8 +90,18 @@ public class Graph {
         //判定結果
         for (int x = 0; x < 180; x += 2) {
             for (int y = 0; y < 180; y += 2) {
-                int cls = ml.evaluate(new double[]{x / 180., y / 180.});
-                g.setColor(cls == 1 ? new Color(192, 192, 255) : new Color(255, 192, 192));
+                double[] outs = ml.evaluate(new double[]{x / 180., y / 180.});
+                
+        		double maxout = 0;
+        		int maxoutIndex = 0;
+        		for(int k = 0; k < outs.length; ++k){
+        			if(outs[k] >= maxout){
+        				maxout = outs[k];
+        				maxoutIndex = k;
+        			}
+        		}
+                
+                g.setColor(maxoutIndex == 1 ? new Color(192, 192, 255) : new Color(255, 192, 192));
                 g.fillRect(x + 10, y + 10, 5, 5);
             }
         }

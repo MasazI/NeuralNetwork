@@ -1,14 +1,10 @@
 package jp.masazdream.ml;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import jp.masazdream.ml.graph.Graph;
 import jp.masazdream.ml.inf.MachineLearning;
 
 /**
- * 2値分類３層ニューラルネットワークの学習と識別クラス
+ * 多クラス分類 3層ニューラルネットワークの学習と識別クラス
  * 
  * @author masai
  *
@@ -17,8 +13,8 @@ public class NeuralNetwork implements MachineLearning{
 	// 入力から中間層の重み係数(入力層のユニットi個、中間層のユニットj個のとき、j x i)
 	double[][] mW;
 	
-	// 中間層から出力層への重み係数
-    double[] mHidden;
+	// 中間層から出力層への重み係数(中間層にユニット数j個、出力層のユニット数k個のとき、k x j)
+    double[][] mHidden;
     
     // 入力パラメータ(ユニット)数
     int mDim;
@@ -44,7 +40,7 @@ public class NeuralNetwork implements MachineLearning{
     	new Graph("NeuralNetwork Backpropagation"){
     		@Override
             public MachineLearning createLearningMachine() {
-                return new NeuralNetwork(2, 2, 1, 10000, 0.2d);
+                return new NeuralNetwork(2, 2, 2, 10000, 0.2d);
             }
     	};    	
     }
@@ -63,6 +59,7 @@ public class NeuralNetwork implements MachineLearning{
     	mEta = eta;
     	
     	// 入力層から中間層への重みの初期値を決定
+    	// 中間層のbiasへは入力層からの結合なし(mHiddendim - 1)、入力層のbiasから中間層へは結合あり(mDim + 1)
         mW = new double[mHiddendim - 1][mDim + 1];
         // 中間ユニット数(iは中間ユニットのインデックス)
         for(int i = 0; i < mW.length; ++i){
@@ -73,17 +70,21 @@ public class NeuralNetwork implements MachineLearning{
         }
         
         // 中間層から出力層への重みの初期値を決定
-        mHidden = new double[mHiddendim];
-        for(int i = 0; i < mHiddendim; ++i){
-            mHidden[i] = Math.random() * 2 - 1;
+        // 出力層はbias項なし(mOutputdim)、中間層のbiasから出力層へは結合あり(mHiddendim)
+        mHidden = new double[mOutputdim][mHiddendim];
+        for(int k = 0; k < mOutputdim; ++k){
+	        for(int j = 0; j < mHiddendim; ++j){
+	            mHidden[k][j] = Math.random() * 2 - 1;
+	        }
         }
     }
     
+
     /**
      * 学習
      */
     @Override
-    public void train(int examplesCnt, int[] clz, double[][] examples){
+    public void train(int examplesCnt, int[][] clz, double[][] examples){
     	System.out.println("[train] start");
     	// 事例データの次元
     	int exampleDim = examples[0].length;
@@ -105,10 +106,10 @@ public class NeuralNetwork implements MachineLearning{
     	}
     	    	
         // 事例データごとの中間層のデータ
-    	double[][] zz = new double[examplesCnt][mDim]; 
+    	double[][] zz = new double[examplesCnt][mHiddendim]; 
     	
-        // 事例データごとの出力層のデータ(2値分類の場合、出力層のデータはスカラ)
-    	double[] outputs = new double[examplesCnt];
+        // 事例データごとの出力層のデータ(2値分類の場合、出力層のユニットが1つであれば出力層のデータはスカラでも良い)
+    	double[][] outputs = new double[examplesCnt][mOutputdim];
         
         // 学習の繰り返し
         System.out.println("Repeat Count: " + mRepeat);
@@ -144,44 +145,55 @@ public class NeuralNetwork implements MachineLearning{
         	// 出力層の出力(2値分類の場合はユニットが1つで良い)
         	for (int l = 0; l < examplesCnt; ++l) {
                 double out = 0;
-                
+                // 事例ごとの中間層の出力
         		double[] z = zz[l];
-                /*--- 中間層から出力層(中間層のユニット数でループ) --*/
-                for(int j = 0; j < z.length; ++j){
-                	out += mHidden[j] * z[j];              	
-                }
-                
-                // 出力値
-                out = sigmoid(out);
-                
-                // 事例ごとの出力層出力の保存
-                outputs[l] = out;
+
+                /*--- 中間層から出力層(出力層x中間層のユニット数でループ) --*/
+        		for(int k = 0; k < mOutputdim; ++k){
+	                for(int j = 0; j < z.length; ++j){
+	                	out += mHidden[k][j] * z[j];              	
+	                }
+	                
+	                // 出力値
+	                out = sigmoid(out);
+	                
+	                // 事例ごとの出力層出力の保存
+	                outputs[l][k] = out;
+        		}
         	}
         	for (int l = 0; l < examplesCnt; ++l) {
         		// 事例の出力層の出力
-        		double out = outputs[l];
+        		double[] out = outputs[l];
         		
         		// 事例のカテゴリー
-        		int category = clz[l];
+        		int[] category = clz[l];
         		
                 // backward
                 /*--- 出力層から中間層 ---*/
-                double delta = (category - out) * out * (1 - out);
+        		double[] delta = new double[mOutputdim];
+        		for(int k = 0; k < mOutputdim; ++k){
+        			delta[k] = (category[k] - out[k]) * out[k] * (1 - out[k]);
                 
-                // 中間層の補正値
-                double[] e = new double[mHiddendim];
-                for(int i = 0; i < mHiddendim; ++i){
-                	// 補正値(補正 x 中間層の出力)
-                	e[i] = delta * zz[l][i];
-                	
-                	// 補正値に学習係数をかけて中間層から出力層への重み係数を更新する
-                	mHidden[i] += e[i] * mEta;
-                }
+	                // 中間層の補正値
+	                double[] e = new double[mHiddendim];
+	                for(int i = 0; i < mHiddendim; ++i){
+	                	// 補正値(補正 x 中間層の出力)
+	                	e[i] = delta[k] * zz[l][i];
+	                	
+	                	// 補正値に学習係数をかけて中間層から出力層への重み係数を更新する
+	                	mHidden[k][i] += e[i] * mEta;
+	                }
+        		}
              
                 /*--- 中間層から入力層 ---*/
                 // 中間層の第1項はbiasであるため計算しない
                 for(int i = 1; i < mHiddendim; ++i){
-                	double sigma = e[i] * mHidden[i] * zz[l][i] * (1 - zz[l][i]);
+                	// 中間層と出力層の誤差を入力層へ伝搬する
+                	double ss = 0;
+                	for(int k = 0; k < mOutputdim; ++k){
+	                	ss += delta[k] * mHidden[k][i];
+                	}	                	
+                	double sigma = ss * zz[l][i] * (1 - zz[l][i]);
                 	
                 	// 入力パラメータ(ユニット)数
                 	for(int j = 0; j < mDim + 1; ++j){
@@ -199,7 +211,7 @@ public class NeuralNetwork implements MachineLearning{
      * 精度測定
      */
 	@Override
-	public int evaluate(double[] data) {
+	public double[] evaluate(double[] data) {
 		// 重み係数を利用してforwardする
 		double[] example = new double[data.length + 1];
 		for(int i = 0; i < data.length; ++i){
@@ -223,13 +235,17 @@ public class NeuralNetwork implements MachineLearning{
 		z[0] = 1;
 		
 		// 中間層から出力層の出力
-		double out = 0;
-		
-		for(int j = 0; j < z.length; ++j){
-			out += mHidden[j] * z[j];
+		double[] outs = new double[mOutputdim];
+		// 出力層のユニット数でループ(mHidden.lengthはmOutputdimと等価)
+		for(int k = 0; k < mHidden.length; ++k){
+			double out = 0;
+			for(int j = 0; j < z.length; ++j){
+				out += mHidden[k][j] * z[j];
+			}
+			outs[k] = sigmoid(out);
 		}
-				
-		return (sigmoid(out) > .5) ? 1 : -1;
+		
+		return outs;
 	}
 	
 	/**
