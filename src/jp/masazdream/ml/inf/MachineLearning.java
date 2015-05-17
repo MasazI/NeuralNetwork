@@ -7,7 +7,7 @@ public interface MachineLearning {
 	 * @param cls クラス
 	 * @param data double配列
 	 */
-	public void train(int cls, double[] data);
+	public void train(int entryCnt, int[] clz, double[][] data);
 	
 	/**
 	 * 精度測定

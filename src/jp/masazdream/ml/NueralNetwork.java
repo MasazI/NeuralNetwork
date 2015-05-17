@@ -30,6 +30,9 @@ public class NueralNetwork implements MachineLearning{
     // 中間層のノード数 + 1(bias項)
     int mHiddendim;
     
+    // 出力層のノード数
+    int mOutputdim;
+    
     // 学習回数
     final int mRepeat;
     
@@ -45,7 +48,7 @@ public class NueralNetwork implements MachineLearning{
     	new Graph("NeuralNetwork Backpropagation"){
     		@Override
             public MachineLearning createLearningMachine() {
-                return new NueralNetwork(2, 2, 10000, 0.3d);
+                return new NueralNetwork(2, 2, 1, 30000, 0.2d);
             }
     	};    	
     }
@@ -56,9 +59,10 @@ public class NueralNetwork implements MachineLearning{
      * @param dim 入力パラメータ数
      * @param hiddendim 中間層のノード数
      */
-    public NueralNetwork(int dim, int hiddendim, int repeat, double eta){
+    public NueralNetwork(int dim, int hiddendim, int outputdim, int repeat, double eta){
     	mDim = dim;
     	mHiddendim = hiddendim + 1; // 1はbias項
+    	mOutputdim = outputdim;
     	mRepeat = repeat;
     	mEta = eta;
     	
@@ -83,17 +87,22 @@ public class NueralNetwork implements MachineLearning{
      * 学習
      */
     @Override
-    public void train(int cls, double[] data){    	
-    	// 2値分類
-    	int y = cls == 1 ? 1 : 0;
+    public void train(int examplesCnt, int[] clz, double[][] data){
+    	// リストに入れ替え
+    	for(int i = 0; i < examplesCnt; ++i){
+    		// 2値分類
+        	int y = clz[i] == 1 ? 1 : 0;
+    		mExamples.add(new AbstractMap.SimpleEntry<Integer, double[]>(y, data[i]));
+    	}
     	
     	// categoryとデータを事例リストに追加
     	// TODO Map非使用
-    	mExamples.add(new AbstractMap.SimpleEntry<Integer, double[]>(y, data));
     	
-        // trainに事例のリストを渡して学習できるように修正
-        // TODO 中間層のデータ
-        // TODO 出力層のデータ
+        // 事例データごとの中間層のデータ
+    	double[][] zz = new double[examplesCnt][mDim]; 
+    	
+        // 事例データごとの出力層のデータ
+    	double[][] outputs = new double[examplesCnt][mOutputdim];
         
         // 学習の繰り返し
         System.out.println("Repeat Count: " + mRepeat);
@@ -148,8 +157,6 @@ public class NueralNetwork implements MachineLearning{
                 
                 // 中間層の補正値
                 double[] e = new double[mHiddendim];
-                // 補正前の係数
-                double[] oldHidden = mHidden.clone();
                 for(int i = 0; i < mHiddendim; ++i){
                 	// 補正値(補正 x 中間層の出力)
                 	e[i] = delta * z[i];
@@ -172,21 +179,8 @@ public class NueralNetwork implements MachineLearning{
         	}
         }
         
-        // 学習結果を出力
-        System.out.println("");
-        System.out.println("w ============");
-        for(int i = 0; i < mW.length; ++i){
-      	  for(int j = 0; j < mW[i].length; ++j){
-      		  System.out.print(mW[i][j]);
-      		  System.out.print(",");
-      	  }
-        }
-        System.out.println("");
-        System.out.println("hidden ==============");
-        for(int i = 0; i < mHidden.length; ++i){
-      	  System.out.print(mHidden[i]);
-      	  System.out.print(",");
-        }
+        // 
+        
     }
     
     /**

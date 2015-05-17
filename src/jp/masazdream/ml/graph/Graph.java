@@ -68,12 +68,18 @@ public class Graph {
         }
         
         //学習
+        int[] clz = new int[linear1X.length + linear2X.length];
+        double[][] examples = new double[linear1X.length + linear2X.length][2];
         for(int i = 0; i < linear1X.length; ++i){
-            ml.train(-1, new double[]{linear1X[i], linear1Y[i]});
+        	clz[i] = -1;
+            examples[i] = new double[]{linear1X[i], linear1Y[i]};
         }
         for(int i = 0; i < linear2X.length; ++i){
-            ml.train( 1, new double[]{linear2X[i], linear2Y[i]});
+           clz[i + linear1X.length] = 1;
+           examples[i + linear1X.length] = new double[]{linear2X[i], linear2Y[i]};
         }        
+        ml.train(linear1X.length + linear2X.length, clz, examples);
+
         Image img = new BufferedImage(200, 200, BufferedImage.TYPE_INT_RGB);
         Graphics g = img.getGraphics();
         g.setColor(Color.WHITE);
