@@ -71,7 +71,7 @@ public class Graph {
         int[] clz = new int[linear1X.length + linear2X.length];
         double[][] examples = new double[linear1X.length + linear2X.length][2];
         for(int i = 0; i < linear1X.length; ++i){
-        	clz[i] = -1;
+        	clz[i] = 0;
             examples[i] = new double[]{linear1X[i], linear1Y[i]};
         }
         for(int i = 0; i < linear2X.length; ++i){
