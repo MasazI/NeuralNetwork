@@ -212,6 +212,20 @@ public class NeuralNetwork implements MachineLearning{
                 	}
                 }
         	}
+        	// 学習が10%進むごとに学習誤差を出力
+        	if((n + 1) % (mRepeat / 10) == 0) {
+        		// 学習誤差
+        		double eps = 0;
+ 
+        		// 出力層のユニットごとに学習誤差を計算して和を求める
+        		for(int k = 0; k < mOutputdim; ++k){
+        			for(int l = 0; l < examplesCnt; ++ l){
+        				eps += Math.pow(clz[l][k] - outputs[l][k], 2) / 2;
+        			}
+        		}
+        		System.out.println("[RepeatCnt, Eps]=" + (n + 1) + "," + eps);
+        	}
+        	
         }
         
         // 学習完了

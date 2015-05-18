@@ -71,14 +71,14 @@ public class Graph {
 
 	    
 	    // 線形分類不可能3(3クラス分類)
-	    double[] nonlinear1X3 = {0.2, 0.15, 0.45, 0.6, 0.3, 0.75, 0.9, 0.85};
-	    double[] nonlinear1Y3 = {0.3, 0.5,  0.85, 0.75,  0.75, 0.7, 0.55, 0.2};
+	    double[] nonlinear1X3 = {0.05, 0.2, 0.15, 0.45, 0.5, 0.6, 0.3, 0.75, 0.9, 0.85};
+	    double[] nonlinear1Y3 = {0.8, 0.3, 0.5,  0.85, 0.1, 0.75,  0.75, 0.7, 0.55, 0.2};
 	    
-	    double[] nonlinear2X3 = {0.55, 0.4,  0.6, 0.8};
+	    double[] nonlinear2X3 = {0.55, 0.4, 0.6, 0.8};
 	    double[] nonlinear2Y3 = {0.6,  0.55, 0.4, 0.55};
 	    
-	    double[] nonlinear3X3 = {0.1, 0.2, 0.3, 0.4};
-	    double[] nonlinear3Y3 = {0.8, 0.85, 0.9, 0.9};
+	    double[] nonlinear3X3 = {0.1, 0.15, 0.2, 0.3, 0.4};
+	    double[] nonlinear3Y3 = {0.8, 0.75, 0.85, 0.9, 0.9};
 	    
 	    f.add(createGraph("線形分離不可能3",
 	            nonlinear1X3, nonlinear1Y3, nonlinear2X3, nonlinear2Y3, nonlinear3X3, nonlinear3Y3));
@@ -174,7 +174,7 @@ public class Graph {
      * @return
      */
     JLabel createGraph(String title, double[] linear1X, double[] linear1Y, double[] linear2X, double[] linear2Y, double[] linear3X, double[] linear3Y) {
-        NeuralNetworkParameter nnParam = new NeuralNetworkParameter(2, 10, 3, 10000, .3d);
+        NeuralNetworkParameter nnParam = new NeuralNetworkParameter(2, 10, 3, 30000, .3d);
     	MachineLearning ml = createLearningMachine(nnParam);
         if(ml == null){
         	return null;
