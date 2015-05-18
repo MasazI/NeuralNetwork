@@ -223,7 +223,7 @@ public class NeuralNetwork implements MachineLearning{
         				eps += Math.pow(clz[l][k] - outputs[l][k], 2) / 2;
         			}
         		}
-        		System.out.println("[RepeatCnt, Eps]=" + (n + 1) + "," + eps);
+        		System.out.println("[RepeatCnt, Eta, Eps]=" + (n + 1) + "," + mEta + "," + eps);
         	}
         	
         }
