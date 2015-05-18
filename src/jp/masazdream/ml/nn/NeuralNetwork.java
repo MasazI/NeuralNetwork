@@ -1,7 +1,8 @@
-package jp.masazdream.ml;
+package jp.masazdream.ml.nn;
 
 import jp.masazdream.ml.graph.Graph;
 import jp.masazdream.ml.inf.MachineLearning;
+import jp.masazdream.ml.param.MachineLearningParameter;
 
 /**
  * 多クラス分類 3層ニューラルネットワークの学習と識別クラス
@@ -38,9 +39,19 @@ public class NeuralNetwork implements MachineLearning{
      */
     public static void main(String[] args){
     	new Graph("NeuralNetwork Backpropagation"){
+    		@Override 
+    		public MachineLearning createLearningMachine(){
+    			return new NeuralNetwork(2, 3, 2, 15000, .3d);
+    		}
+    		
     		@Override
-            public MachineLearning createLearningMachine() {
-                return new NeuralNetwork(2, 2, 2, 10000, 0.2d);
+            public MachineLearning createLearningMachine(MachineLearningParameter param) {
+    			NeuralNetworkParameter nnParam = (NeuralNetworkParameter) param;
+                return new NeuralNetwork(nnParam.getmInputLayerNum(), 
+                		nnParam.getmHiddenLayerNum(), 
+                		nnParam.getmOutputLayerNum(), 
+                		nnParam.getmRepeatCnt(), 
+                		nnParam.getmEta());
             }
     	};    	
     }
